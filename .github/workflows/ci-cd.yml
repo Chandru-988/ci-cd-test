@@ -1,0 +1,40 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - name: SSH into server and deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no user@localhost "
+            cd /path/to/local/deployment &&
+            git pull &&
+            npm install &&
+            echo 'Deployed successfully!'"
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
